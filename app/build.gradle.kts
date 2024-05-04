@@ -14,6 +14,12 @@ repositories {
     mavenCentral()
 }
 
+buildscript {
+    dependencies {
+        classpath("org.flywaydb:flyway-mysql:10.12.0")
+    }
+}
+
 val flywayMigration = configurations.create("flywayMigration")
 
 dependencies {
