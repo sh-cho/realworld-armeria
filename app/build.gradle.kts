@@ -27,6 +27,8 @@ dependencies {
     implementation("com.linecorp.armeria:armeria")
     implementation("com.linecorp.armeria:armeria-logback")
     implementation(libs.guava)
+    implementation(libs.sulky.ulid)
+    implementation(libs.jetbrains.annotations)
 
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.mysql.connector.j)
@@ -53,15 +55,20 @@ flyway {
     url = "jdbc:mysql://localhost:3306/realworld"
     user = "root"
     password = "root"
+
+    // TODO: remove
+    cleanDisabled = false
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
+// TODO: separation pojo and table names
+//  (like POJO: Article, Table: TArticle or something)
+//  Maybe `T-` prefix could be misunderstood with Thrift?
 jooq {
     version.set(libs.versions.jooq.get())
     edition.set(nu.studer.gradle.jooq.JooqEdition.OSS)
@@ -83,10 +90,10 @@ jooq {
                     })
                 }
                 generator.apply {
-                    name = "org.jooq.codegen.DefaultGenerator"
+                    name = "org.jooq.codegen.JavaGenerator"
                     database.apply {
                         name = "org.jooq.meta.mysql.MySQLDatabase"
-                        inputSchema = "public"
+                        inputSchema = "realworld"
                         forcedTypes.addAll(listOf(
                             ForcedType().apply {
                                 name = "varchar"
@@ -97,6 +104,20 @@ jooq {
                                 name = "varchar"
                                 includeExpression = ".*"
                                 includeTypes = "INET"
+                            },
+
+                            ForcedType().apply {
+//                                name = org.jooq.impl.SQLDataType.BOOLEAN.name
+                                name = "BOOLEAN"
+                                includeExpression = ".*\\.IS_VALID"
+                            },
+
+                            // (MYSQL) BINARY(16)(=byte[]) <-> ULID.Value (jOOQ)
+                            ForcedType().apply {
+                                userType = "de.huxhorn.sulky.ulid.ULID.Value"
+                                binding = "io.realworld.jooq.MysqlUlidBinding"
+                                includeExpression = ".*\\.ULID"
+                                includeTypes = "(?i:BINARY)"
                             }
                         ))
                     }

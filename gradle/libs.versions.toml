@@ -9,6 +9,8 @@ logback-classic = "1.5.6"
 assertj-core = "3.25.3"
 jooq = "3.19.8"
 mysql-connector-j = "8.4.0"
+sulky-ulid = "8.3.0"
+jetbrains-annotations = "24.1.0"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
@@ -20,3 +22,5 @@ jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
 jooq-meta = { module = "org.jooq:jooq-meta", version.ref = "jooq" }
 jooq-codegen = { module = "org.jooq:jooq-codegen", version.ref = "jooq" }
 mysql-connector-j = { module = "com.mysql:mysql-connector-j", version.ref = "mysql-connector-j" }
+sulky-ulid = { module = "de.huxhorn.sulky:de.huxhorn.sulky.ulid", version.ref = "sulky-ulid" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
