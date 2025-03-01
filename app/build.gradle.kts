@@ -1,3 +1,4 @@
+import nu.studer.gradle.jooq.JooqGenerate
 import org.jooq.meta.jaxb.ForcedType
 import org.jooq.meta.jaxb.Logging
 import org.jooq.meta.jaxb.Property
@@ -7,6 +8,7 @@ plugins {
     application
 
     id("nu.studer.jooq") version "9.0"
+//    id("org.jooq.jooq-codegen-gradle") version "3.19.8"
     id("org.flywaydb.flyway") version "10.12.0"
 }
 
@@ -26,9 +28,20 @@ dependencies {
     implementation(platform(libs.armeria.bom))
     implementation("com.linecorp.armeria:armeria")
     implementation("com.linecorp.armeria:armeria-logback")
+
     implementation(libs.guava)
     implementation(libs.sulky.ulid)
-    implementation(libs.jetbrains.annotations)
+    implementation(libs.hikaricp)
+
+    // mapstruct
+    implementation(libs.mapstruct)
+    annotationProcessor(libs.mapstruct.processor)
+
+    implementation(libs.jspecify)
+
+    // dagger
+    implementation(libs.dagger)
+    annotationProcessor(libs.dagger.compiler)
 
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.mysql.connector.j)
@@ -37,7 +50,12 @@ dependencies {
     implementation(libs.jooq)
     implementation(libs.jooq.meta)
     implementation(libs.jooq.codegen)
+    implementation(libs.jakarta.xml.bind.api)
+//    jooqCodegen(libs.jooq.meta.extensions)
+//    jooqCodegen(libs.mysql.connector.j)
+    jooqGenerator(libs.jooq.meta.extensions)
     jooqGenerator(libs.mysql.connector.j)
+    jooqGenerator(project(":lib"))  // for custom GeneratorStrategy
 
     // flyway
     flywayMigration(libs.mysql.connector.j)
@@ -52,7 +70,7 @@ dependencies {
 
 flyway {
     configurations = arrayOf("flywayMigration")
-    url = "jdbc:mysql://localhost:3306/realworld"
+    url = "jdbc:mysql://localhost:3307/realworld"
     user = "root"
     password = "root"
 
@@ -62,9 +80,80 @@ flyway {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
+
+//jooq {
+//    version = libs.versions.jooq.get()
+//
+//    configuration {}
+//
+//    executions {
+//        create("main") {
+//            configuration {
+//                logging = Logging.DEBUG
+//                jdbc = null  // ?
+//
+//                generator {
+//                    name = "org.jooq.codegen.JavaGenerator"
+//
+//                    database {
+//                        name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+//
+//                        properties {
+//                            property {
+//                                key = "scripts"
+//                                value = "src/main/resources/db/migration/*.sql"
+//                            }
+//                            property {
+//                                key = "sort"
+//                                value = "flyway"
+//                            }
+//                            property {
+//                                key = "unqualifiedSchema"
+//                                value = "none"
+//                            }
+//                            property {
+//                                key = "defaultNameCase"
+//                                value = "upper"
+//                            }
+//                        }
+//
+//                        forcedTypes {
+//                            forcedType {
+//                                name = "BOOLEAN"
+//                                includeExpression = ".*\\.IS_VALID"
+//                            }
+//                            forcedType {
+//                                userType = "de.huxhorn.sulky.ulid.ULID.Value"
+//                                binding = "io.realworld.common.jooq.MysqlUlidBinding"
+//                                includeExpression = ".*\\.ULID"
+//                                includeTypes = "(?i:BINARY)"
+//                            }
+//                        }
+//                    }
+//
+//                    generate {
+//                        isDeprecated = false
+//                        isRecords = true
+//                        isImmutablePojos = true
+//                        isFluentSetters = true
+//                    }
+//
+//                    target {
+//                        packageName = "io.realworld"
+//                        directory = "${projectDir}/build/generated-src/jooq/main"
+//                    }
+//
+//                    strategy {
+//                        name = "org.jooq.codegen.DefaultGeneratorStrategy"
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 // TODO: separation pojo and table names
 //  (like POJO: Article, Table: TArticle or something)
@@ -76,47 +165,48 @@ jooq {
     configurations {
         create("main") {
             generateSchemaSourceOnCompilation.set(true)
-
             jooqConfiguration.apply {
                 logging = Logging.WARN
-                jdbc.apply {
-                    driver = "com.mysql.cj.jdbc.Driver"
-                    url = "jdbc:mysql://localhost:3306/realworld"
-                    user = "root"
-                    password = "root"
-                    properties.add(Property().apply {
-                        key = "ssl"
-                        value = "false"
-                    })
-                }
+//                jdbc.apply {
+//                    driver = "com.mysql.cj.jdbc.Driver"
+//                    url = "jdbc:mysql://localhost:3306/realworld"
+//                    user = "root"
+//                    password = "root"
+//                    properties.add(Property().apply {
+//                        key = "ssl"
+//                        value = "false"
+//                    })
+//                }
                 generator.apply {
                     name = "org.jooq.codegen.JavaGenerator"
                     database.apply {
-                        name = "org.jooq.meta.mysql.MySQLDatabase"
-                        inputSchema = "realworld"
+//                        name = "org.jooq.meta.mysql.MySQLDatabase"
+//                        inputSchema = "realworld"
+                        name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+                        properties.addAll(listOf(
+                            Property().apply {
+                                key = "scripts"
+                                value = "src/main/resources/db/migration/*.sql"
+                            },
+                            Property().apply {
+                                key = "sort"
+                                value = "flyway"
+                            },
+                            Property().apply {
+                                key = "unqualifiedSchema"
+                                value = "none"
+                            },
+                            Property().apply {
+                                key = "defaultNameCase"
+                                value = "upper"
+                            }
+                        ))
                         forcedTypes.addAll(listOf(
-                            ForcedType().apply {
-                                name = "varchar"
-                                includeExpression = ".*"
-                                includeTypes = "JSONB?"
-                            },
-                            ForcedType().apply {
-                                name = "varchar"
-                                includeExpression = ".*"
-                                includeTypes = "INET"
-                            },
-
-                            ForcedType().apply {
-//                                name = org.jooq.impl.SQLDataType.BOOLEAN.name
-                                name = "BOOLEAN"
-                                includeExpression = ".*\\.IS_VALID"
-                            },
-
                             // (MYSQL) BINARY(16)(=byte[]) <-> ULID.Value (jOOQ)
                             ForcedType().apply {
                                 userType = "de.huxhorn.sulky.ulid.ULID.Value"
-                                binding = "io.realworld.jooq.MysqlUlidBinding"
-                                includeExpression = ".*\\.ULID"
+                                binding = "io.realworld.common.jooq.MysqlUlidBinding"
+                                includeExpression = ".*\\.ID"
                                 includeTypes = "(?i:BINARY)"
                             }
                         ))
@@ -128,18 +218,20 @@ jooq {
                         isFluentSetters = true
                     }
                     target.apply {
-                        packageName = "io.realworld"
+                        packageName = "io.realworld.jooq"
                         directory = "build/generated-src/jooq/main"
                     }
-                    strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
+
+                    // strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
+                    strategy.name = "io.realworld.common.jooq.DepluralizedAndPojoNamingGeneratorStrategy"
                 }
             }
         }
     }
 }
 
-tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
-    dependsOn("flywayMigrate")
+tasks.named<JooqGenerate>("generateJooq") {
+//    dependsOn("flywayMigrate")
 
     // declare Flyway migration scripts as inputs on the jOOQ task
     inputs.files(fileTree("src/main/resources/db/migration"))

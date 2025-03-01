@@ -12,3 +12,4 @@ plugins {
 
 rootProject.name = "realworld-armeria"
 include("app")
+include("lib")

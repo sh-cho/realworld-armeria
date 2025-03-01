@@ -1,11 +1,10 @@
-package io.realworld.jooq;
+package io.realworld.common.jooq;
 
 import java.io.Serial;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
 
-import org.jetbrains.annotations.Nullable;
 import org.jooq.Binding;
 import org.jooq.BindingGetResultSetContext;
 import org.jooq.BindingGetSQLInputContext;
@@ -17,6 +16,7 @@ import org.jooq.BindingSetStatementContext;
 import org.jooq.Converter;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
+import org.jspecify.annotations.Nullable;
 
 import de.huxhorn.sulky.ulid.ULID;
 
@@ -38,8 +38,7 @@ public class MysqlUlidBinding implements Binding<byte[], ULID.Value> {
             private static final long serialVersionUID = 5792124078876128755L;
 
             @Override
-            @Nullable
-            public ULID.Value from(byte[] bytes) {
+            public ULID.@Nullable Value from(byte @Nullable [] bytes) {
                 if (bytes == null) {
                     return null;
                 } else {
@@ -48,8 +47,7 @@ public class MysqlUlidBinding implements Binding<byte[], ULID.Value> {
             }
 
             @Override
-//            @Nullable
-            public byte[] to(ULID.Value ulidValue) {
+            public byte @Nullable [] to(ULID.Value ulidValue) {
                 return ulidValue.toBytes();
             }
 

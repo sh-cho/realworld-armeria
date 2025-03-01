@@ -8,6 +8,6 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: realworld
     ports:
-      - "127.0.0.1:3306:3306"
+      - "127.0.0.1:3307:3306"
     volumes:
       - ./db-data:/var/lib/mysql

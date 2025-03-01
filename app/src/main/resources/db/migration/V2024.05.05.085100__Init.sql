@@ -76,10 +76,10 @@ CREATE TABLE article_tags
 
 -- ----------------------------------------------------------------------
 -- For test
-DROP TABLE IF EXISTS vince_tmp;
-CREATE TABLE vince_tmp
-(
-    ulid       BINARY(16)   PRIMARY KEY,
-    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_valid   TINYINT(1)   NOT NULL DEFAULT FALSE
-);
+-- DROP TABLE IF EXISTS tmp;
+-- CREATE TABLE tmp
+-- (
+--     ulid       BINARY(16)   PRIMARY KEY,
+--     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     is_valid   TINYINT(1)   NOT NULL DEFAULT FALSE
+-- );
