@@ -7,7 +7,8 @@ import com.linecorp.armeria.server.logging.AccessLogWriter;
 
 import dagger.Module;
 import dagger.Provides;
-import io.realworld.application.UserService;
+import de.huxhorn.sulky.ulid.ULID;
+import io.realworld.interfaces.user.UserController;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 
@@ -16,12 +17,12 @@ interface RealworldServerModule {
 
     @Singleton
     @Provides
-    static Server server(@Named("port") int port, UserService userService) {
+    static Server server(@Named("port") int port, UserController userController) {
         final ServerBuilder sb = Server.builder();
 
         sb.http(port)
           .accessLogWriter(AccessLogWriter.common(), true)
-          .annotatedService("/user", userService)
+          .annotatedService("/api", userController)
           .serviceUnder("/docs", new DocService());
 
         return sb.build();
@@ -31,5 +32,10 @@ interface RealworldServerModule {
     @Provides
     static int port() {
         return 8080;
+    }
+
+    @Provides
+    static ULID ulid() {
+        return new ULID();
     }
 }

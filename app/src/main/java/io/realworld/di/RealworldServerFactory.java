@@ -7,6 +7,7 @@ import jakarta.inject.Singleton;
 
 @Singleton
 @Component(modules = {
+        AuthModule.class,
         RealworldServerModule.class,
         RepositoryModule.class,
 })

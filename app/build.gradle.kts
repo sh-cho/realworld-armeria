@@ -10,10 +10,23 @@ plugins {
     id("nu.studer.jooq") version "9.0"
 //    id("org.jooq.jooq-codegen-gradle") version "3.19.8"
     id("org.flywaydb.flyway") version "10.12.0"
+    id("scabbard.gradle") version "0.5.0"
 }
 
 repositories {
     mavenCentral()
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "com.github.kittinunf.result" &&
+            requested.name == "result" &&
+            requested.version == "3.0.0"
+        ) {
+            useVersion("3.0.1")
+            because("Transitive dependency of Scabbard, currently not available on mavenCentral()")
+        }
+    }
 }
 
 buildscript {
@@ -30,6 +43,7 @@ dependencies {
     implementation("com.linecorp.armeria:armeria-logback")
 
     implementation(libs.guava)
+    implementation(libs.commons.lang3)
     implementation(libs.sulky.ulid)
     implementation(libs.hikaricp)
 
@@ -42,6 +56,8 @@ dependencies {
     // dagger
     implementation(libs.dagger)
     annotationProcessor(libs.dagger.compiler)
+
+    implementation(libs.java.jwt)
 
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.mysql.connector.j)
@@ -82,6 +98,16 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("-parameters")
+}
+
+scabbard {
+    enabled = true
+    outputFormat = "svg"
 }
 
 //jooq {

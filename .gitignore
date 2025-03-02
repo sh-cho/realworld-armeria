@@ -125,5 +125,6 @@ gradle-app.setting
 # End of https://www.toptal.com/developers/gitignore/api/macos,intellij,java,gradle
 
 .idea/
+!.idea/icon.svg
 db-data/
 .mise.toml
