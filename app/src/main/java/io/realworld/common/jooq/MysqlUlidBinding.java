@@ -66,9 +66,9 @@ public class MysqlUlidBinding implements Binding<byte[], ULID.Value> {
     @Override
     public void sql(BindingSQLContext<ULID.Value> ctx) throws SQLException {
         if (ctx.render().paramType() == ParamType.INLINED) {
-            ctx.render().visit(DSL.inline(ctx.convert(converter()).value())).sql("::ulid");
+            ctx.render().visit(DSL.inline(ctx.convert(converter()).value()));
         } else {
-            ctx.render().sql(ctx.variable()).sql("::ulid");
+            ctx.render().sql(ctx.variable());
         }
     }
 
